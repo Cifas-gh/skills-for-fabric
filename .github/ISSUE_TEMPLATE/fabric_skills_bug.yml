@@ -25,12 +25,14 @@ body:
         - Data engineering (Spark / lakehouse / notebooks)
         - SQL Data Warehouse
         - SQL database
+        - Database Hub
         - Dataflows Gen2
         - Eventhouse / KQL
         - Event Schema Set / Real-Time Intelligence
         - Eventstream / Real-Time Intelligence
         - Activator / Reflex
-        - OneLake Catalog (search / discovery / governance)
+        - OneLake Catalog (search / discovery / curation / governance)
+        - Microsoft Fabric Planning
         - Power BI semantic models
         - Ananke / FabricIQ (Power BI data exploration)
         - Power BI Reports
@@ -38,6 +40,7 @@ body:
         - Fabric CI/CD
         - Azure Monitor into Fabric
         - Fabric cost estimation
+        - Fabric Governance
         - Infrastructure / repo / CI / general (or not sure)
     validations:
       required: true

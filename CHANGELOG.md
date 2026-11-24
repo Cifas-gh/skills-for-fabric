@@ -4,6 +4,99 @@ User-facing changes for the public Microsoft Fabric Skills release.
 
 ## [Unreleased]
 
+## [0.3.23] - 2026-11-19
+
+### Added
+- **`plan-cli`** -- Create, rename, update descriptions and delete Microsoft
+  Fabric Plan items, with explicit target selection and completion checks.
+  Read and validate saved Plan definitions, or summarize Plan visuals as prose
+  or JSON from supplied values or an authorized host reader. Summaries preserve
+  the supplied labels, units and coverage without calculating new figures.
+  Narratives, definitions, sheets, visuals and model bindings remain read-only.
+
+### Changed
+- **`activator-cli`** -- Answer "when did my alert fire?" through the public
+  Activator `queryActivations` API, using read-only KQL for activation history
+  and per-rule counts. Answers state the checked time window and claim a rule
+  never fired only after checking its full history.
+- **`fabriciq`** -- Read relevant model-authored topics before answering Power BI
+  questions, including topic bodies omitted from schema overviews, while
+  preserving verified-answer precedence.
+
+## [0.3.22] - 2026-11-12
+
+### Added
+- **`fabric-policies-cli`** -- discover current Fabric governance policies and
+  updates from official documentation, then translate intent into PolicySet
+  configurations using verified contracts. Resolve scenario objects and required
+  roles through read-only discovery, present one reviewable plan, and execute its
+  API lifecycle only after explicit approval. Respect offline requests, keep
+  unverified APIs design-only, and propose weekly knowledge updates for review.
+
+### Fixed
+- Correct `spark-cli` job-history requests to paginate retained runs before
+  client-side sorting and recent-run selection, rather than using an
+  undocumented server-side limit.
+- Correct `deployment-pipelines-authoring-cli` Warehouse definition retrieval
+  guidance and distinguish deployment support from feature-specific preview
+  qualifications without inferring production readiness.
+- MCP registration scripts now require `-AllowInsecureHttp` / `--allow-insecure-http` for non-loopback HTTP endpoints; use HTTPS, or explicitly opt in only on a trusted network.
+
+## [0.3.21] - 2026-11-05
+
+### Added
+- **`databasehub-cli`** -- added read-only database estate inventory,
+  cross-engine health, issues and suggestions, and security posture analysis
+  through Entra-authenticated Fabric APIs.
+
+### Changed
+- **`ontology-cli`** -- the unified Microsoft Fabric Ontology skill is now named `ontology-cli`. This is a breaking skill-ID rename: replace explicit `fabriciq-ontology-cli` invocations with `ontology-cli`. Natural-language Ontology requests continue to route to its authoring and consumption modes.
+- **`ontology-cli`** -- asking a question about a new-experience (V2) Fabric Ontology now goes straight to the ontology's own agent endpoint, which resolves your wording against the ontology model, queries the bound data, and returns a plain-language answer. It can also return grounded, runnable KQL, SQL, DAX or Python when you name the language and execution target. During preview, this path requires delegated user sign-in; service principals are not supported. CLI authoring remains limited to legacy V1 definitions and cannot create or upgrade V2 items.
+- `project-osmos` shows its run card and follow-up, pause/resume, deletion, and feedback guidance together immediately after a successful start or resume response, before further task operations or acting on follow-ups, while preserving confirmation and execution-capacity safeguards.
+- `project-osmos` reads task status/messages, reports progress, then returns control to the user. The startup handoff and later progress checks remain available when browser launch fails.
+- `project-osmos` selects existing tasks from conversation or recovery context, asks for confirmation when ambiguous, and distinguishes resuming a run from sending a follow-up message.
+- `project-osmos` handles explicit Resume requests for completed tasks using the same task's run endpoint. Offline request planning stays offline across follow-up turns unless the user explicitly authorizes live execution.
+- `project-osmos` keeps task-splitting and medallion-build requests assigned to Osmos in one task across all requested layers and entities, rather than substituting an architecture-planning workflow.
+- `project-osmos` preserves message IDs and submission-state recovery guidance when a custom continuation transport raises a network or incomplete-response error, without retrying or switching transports.
+
+### Removed
+- **`ontology-cli`** -- the consumption mode no longer reads an Ontology's definition and hand-writes a source query for Lakehouse, Warehouse, or Eventhouse. That path skipped the Ontology agent's grounding and validation. For supported new-experience Ontologies, ask the Ontology directly; when you request runnable code, the answer is grounded in its real bindings.
+- **`ontology-cli`** -- V1 Ontologies no longer support natural-language consumption. The skill stops without querying and tells you to upgrade or recreate the item in the new Ontology experience; it never substitutes a legacy or hand-written source query.
+
+### Fixed
+- **`ontology-cli`** -- response-capture examples preserve the prepared question or schema request instead of replacing it with a discovery request.
+- **`ontology-cli`** -- validates absolute PowerShell request-file paths before contacting the Ontology Agent, preventing malformed requests when the shell and .NET working directories differ.
+- **`ontology-cli`** -- legacy authoring validates Eventhouse binding identities before confirmation, preventing a KQL database ID from being used where the parent Eventhouse item ID is required.
+- **`ontology-cli`** -- preserves the saved Ontology Agent answer when a streamed response is followed by a progress notification, without repeating the billed request.
+- **`ontology-cli`** -- honors explicit verbatim schema requests by constructing and checking replies against the saved service text, preserving identifiers instead of abbreviating them or switching to a summary.
+- **`ontology-cli`** -- includes the complete authoring change-set preview, including retained parts, in the final confirmation message instead of leaving it only in earlier output.
+- **`ontology-cli`** -- submits confirmed authoring request files without Windows JSON-quoting loss and reads definitions back in the same PowerShell process; a failed write requires fresh confirmation before another attempt.
+- `project-osmos` rejects invalid Lakehouse URLs before authentication or execution and may request a valid URL for the intended environment without automatically switching targets. It returns the complete requested offline plan on each follow-up turn; explanation-only requests do not authenticate or change saved task state.
+- `project-osmos` uses canonical task endpoints; existing tasks keep their IDs and history without migration.
+- `project-osmos` checks workspace capacity before execution, explains trial-capacity restrictions and unknown eligibility, and keeps read-only task inspection available. Generic Spark failures no longer trigger an automatic retry.
+- `project-osmos` rejects untrusted saved task hosts and redirects, and stops saved-task execution when the workspace no longer has a capacity assignment.
+- `project-osmos` retains follow-up message recovery IDs when a transport or run-conflict lookup fails, distinguishing an unconfirmed submission from a message already posted.
+- `project-osmos` also preserves follow-up recovery context for truncated HTTP responses and refuses redirects during capacity metadata checks.
+- `project-osmos` preserves saved tenant and capacity context in PowerShell check-only preflight, validates saved backend routes separately from browser URLs, and distinguishes missing capacity assignments from unknown SKU eligibility.
+- `project-osmos` handles selected Fabric targets, authentication and same-task continuation in one skill, without an additional plugin or token library. Existing saved routing remains usable; production capacity policy stays scoped to production.
+- `project-osmos` preserves the target from a Lakehouse URL or saved routing through credential refresh, task links and uploads, without silently substituting production.
+- `project-osmos` stops execution, including standalone capacity checks, when the current workspace capacity assignment is unreadable, missing or invalid; acknowledging unknown SKU eligibility cannot bypass that check. Capacity-SKU read timeouts leave eligibility unknown and require explicit acknowledgment.
+- **`git-integration-operations-cli`** - Generates or condenses Fabric Git
+  commit comments to the API's 300-character maximum before submission,
+  validates externally supplied pipeline comments locally, and handles
+  synchronous, asynchronous, throttled and failed commit responses explicitly.
+
+## [0.3.20] - 2026-10-29
+
+### Added
+- **`onelake-catalog-cli`** -- one skill for the OneLake catalog. It picks the right mode from your request: the four existing governance modes (tenant-admin and data-owner audits and guarded remediation of domains, workspace assignment, capacity, labels, tag definitions, workspace tags, certification, refresh and item identity), and a new **curate** mode that helps item owners make Microsoft Fabric items easier to find by suggesting a description, display name, and tags based on the item's content, plus descriptions for its tables and columns, and applying each suggestion only after the owner reviews and confirms it. Curate works on one item, a list of items, or one workspace. Governance audits report description and tag coverage; to fix the gaps you pick, they hand off to curate, which still asks you to approve every suggestion.
+
+### Changed
+- **Skill and plugin paths** -- governance moved from `skills/onelake-catalog-govern-cli` to `skills/onelake-catalog-cli` with its references at the same relative paths. Anything pinning the old path moves to the new one. Item descriptions, display names and item tags are now written only by curate mode; governance keeps workspace tags and tenant tag definitions, and no longer writes item descriptions or item tags itself.
+
+### Removed
+- **`onelake-catalog-govern-cli`** -- replaced by the governance modes of `onelake-catalog-cli`. Existing governance prompts keep working.
+
 ## [0.3.19] - 2026-10-01
 
 ### Changed

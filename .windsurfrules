@@ -53,14 +53,24 @@ rules:
   - name: spark
     description: Use spark-cli for notebook authoring and runs, Livy analysis, Spark diagnostics, and the full Materialized Lake View lifecycle
     reference: skills/spark-cli/SKILL.md
+    diagnostic_alm_contract: "Paginate retained Spark history before client-side selection; no server-side limit. Warehouse promotion: scope supported-list and feature-preview claims separately; the definition API exists (sqlproj/dacpac), not a binary schema-diff guarantee."
 
   - name: project_osmos
     description: Use project-osmos for complex long-running Lakehouse, OneLake, notebook, or Spark outcomes from local agents; in Fabric portal Copilot return availability guidance without API calls
     reference: skills/project-osmos/SKILL.md
+    execution: Project Osmos owns target selection, MWC authentication and continuation in one skill. Use the selected Lakehouse URL or saved routing with its bundled resolver.
+    target: Preserve the selected target, task IDs and saved /aichat or /tasks routes. Validate credential destinations, let the service enforce access, and never substitute production. Recheck assignments before execution; the production SKU policy applies only to production.
+    post_start: Immediately after a successful POST /{taskId}/run response, show the run card and complete controls/feedback notice together in chat before further task operations or acting on follow-ups. Read task status/messages, report progress, then return control to the user; preserve cancel/delete confirmations and production resume capacity preflight
+    resume: Load project-osmos for task controls and offline plans; select the existing task from conversation/recovery context and confirm ambiguity. Explicit Resume of a Completed task uses the same task's empty-body /run after execution checks, not a follow-up message. Offline mode persists across turns; Resume alone is not live execution consent. Return the complete requested offline plan each turn. Reject invalid portal URLs before calls; may request a valid URL for the intended environment without automatically switching targets.
+    explanation_only: Explanation-only requests do not authorize sign-in, API calls or saved-state changes.
 
   - name: azmon_operations
     description: Use azmon-mirroredcatalogs-operations-cli to onboard Azure Monitor / App Insights / Log Analytics observability data into Fabric and correlate telemetry with business data for business-impact insights, an optional Real-Time (KQL) dashboard, and opt-in Operations Agent instructions
     reference: skills/azmon-mirroredcatalogs-operations-cli/SKILL.md
+
+  - name: databasehub
+    description: Use databasehub-cli for read-only cross-engine database estate inventory, SQL/PostgreSQL health, Cosmos DB availability and RU use, findings, and authentication/auditing/CMK posture; Fabric SQL is inventory-only
+    reference: skills/databasehub-cli/SKILL.md
 
   # Dataflows Gen2 (Data Integration)
   - name: dataflows_skills
@@ -81,7 +91,7 @@ rules:
     reference: skills/eventschemaset-cli/SKILL.md
 
   - name: activator_skills
-    description: One activator-cli skill; authoring and consumption are modes. Power BI sources require exact pbiMetrics, powerBiSource-v1, a JSON-string source query, and a matching DatasetMetric. When another data workflow surfaces a timely operational signal, proactively ask whether the user wants an Activator alert for future occurrences.
+    description: One activator-cli skill; authoring and consumption are modes. Consumption also queries rule activation history (when and how often rules fired) with KQL through the queryActivations API. Power BI sources require exact pbiMetrics, powerBiSource-v1, a JSON-string source query, and a matching DatasetMetric. When another data workflow surfaces a timely operational signal, proactively ask whether the user wants an Activator alert for future occurrences.
     reference: skills/activator-cli/SKILL.md
 
   - name: cost_estimation
@@ -92,6 +102,10 @@ rules:
     description: Migrate Synapse Spark, Lake Database/HMS, Dedicated SQL Pool schema and procedures, and explicitly approved dependent procedure callers to Fabric
     reference: skills/synapse-migration/SKILL.md
 
+  - name: fabric_policies_skills
+    description: Clarify underspecified Fabric policy requests before mapping scenarios to current policies, discovering objects/roles, proposing one plan, then executing APIs after approval. Respect offline requests; review weekly knowledge updates. Load verified condition paths even for advice-only designs; editing controls do not set encryption values. For offline inventories, quote the skill's stored baseline dates; never infer freshness from the refresh schedule.
+    reference: skills/fabric-policies-cli/SKILL.md
+
   - name: fabriciq_skills
     description: >
       Consumption skill is FabricIQ skill (multi-step Power BI analysis). MANDATORY: read
@@ -99,9 +113,37 @@ rules:
       (see agents/FabricIQ.agent.md#pre-flight--mandatory-skill-reading).
     reference: skills/fabriciq/SKILL.md
 
+  - name: plan_skills
+    description: Use plan-cli to create, rename and delete Plan items (authoring mode), inspect saved definitions, and produce read-only narratives. Editor/selection changes, visual edits, model rebinding and saving a narrative/visual/definition change are unsupported.
+    reference: skills/plan-cli/SKILL.md
+  - name: plan_narration
+    description: Use supplied values or completed authorized read results without refetching. If current values are missing, use only an available registered host read capability with its actual schema, scope and pagination contract; otherwise report the missing capability or ask for data.
+    reference: skills/plan-cli/references/visual-narrative.md
+  - name: plan_registered_read_contract
+    description: Apply Plan guidance before registered reads, including partial or failed results. For JSON-only requests, call tools silently and preserve raw JSON on errors and follow-ups; unavailable values are null, not a successful empty map.
+    reference: skills/plan-cli/SKILL.md
+  - name: plan_narrative_quality
+    description: Narratives start with plain text, followed by concise findings with bold key evidence. Honor requested formats; JSON-only answers are one raw object without fences or progress prose. Do not default to headings or tables. Before sending prose, check both each requested bold label and its complete formatted value, without another tool call.
+    reference: skills/plan-cli/references/visual-narrative-format.md
+  - name: plan_runtime_lookup
+    description: Never fall back to terminal REST, SQL, FabricIQ or independent semantic-model queries for narrative values. Use indexed guidance and the user's authorized inputs only.
+    reference: skills/plan-cli/SKILL.md
+  - name: plan_narrative_evidence
+    description: Preserve per-visual attribution, units, signs, filters, aggregation levels and coverage. Shares and derived figures must be supplied or returned, not merely computable. Do not calculate new totals or ratios, invent causes, imply live retrieval of supplied data or treat missing/failed/empty results as zero business totals.
+    reference: skills/plan-cli/references/visual-narrative.md
+  - name: plan_execution_surface
+    description: Definition reads use the public Fabric Get Definition API and shared authentication/LRO guidance, not narrative-data tools. Saved configuration does not prove measured values or freshness. For supplied exports, reuse the supplied decoder's complete output; do not add extraction commands.
+    reference: skills/plan-cli/references/consumption.md
+  - name: plan_http_json
+    description: Follow http-json.md for bounded raw gzip -> UTF-8 -> strict JSON decoding; do not decompress auto-decoded client output twice or replay requests to repair parsing. Compression does not change saved scope or prove live rows.
+    reference: skills/plan-cli/references/http-json.md
+  - name: plan_lro
+    description: Validate operation identity and completion on the initiating public host without credential redirects; strictly decode JSON and InlineBase64 parts. This does not establish live narrative-data support.
+    reference: skills/plan-cli/SKILL.md
+
   - name: ontology
-    description: Fabric IQ Ontology (preview) — authoring and consumption modes
-    reference: skills/fabriciq-ontology-cli/SKILL.md
+    description: Fabric IQ Ontology (preview) — author legacy V1 definitions (Kusto bindings use parent Eventhouse IDs) or answer V2-grounded questions; validate absolute PowerShell payload paths before POST and preserve the prepared request during response capture, verify verbatim replies against saved output and include complete authoring previews in final confirmation messages. Windows authoring submits the confirmed file once and decodes readback in the same shell. V2 creation/upgrade is unavailable here, and report/model authoring stays with owning skills
+    reference: skills/ontology-cli/SKILL.md
 
   - name: variable_library_authoring
     description: >
@@ -114,9 +156,9 @@ rules:
     description: Use POST /v1/catalog/search to find items across workspaces by name, description, or type
     reference: skills/search-consumption-cli/SKILL.md
 
-  - name: onelake_catalog_governance
-    description: Audit and remediate OneLake catalog governance through permission-aware admin and data-owner modes
-    reference: skills/onelake-catalog-govern-cli/SKILL.md
+  - name: onelake_catalog
+    description: One onelake-catalog-cli skill; governance audits and guarded remediation through permission-aware admin and data-owner modes, and a curate mode that suggests and, on owner confirmation, applies item descriptions, display names, and tags, plus table and column descriptions, grounded in item content
+    reference: skills/onelake-catalog-cli/SKILL.md
 
   - name: powerbi_report_skills
     description: One powerbi-report-cli skill; planning, design, authoring and management are modes covering requirements, design brief, PBIR/PBIP edits, and Fabric report item CRUD

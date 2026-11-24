@@ -39,6 +39,7 @@ Fabric REST APIs: https://learn.microsoft.com/en-us/rest/api/fabric/articles/
 | Warehouse | https://learn.microsoft.com/en-us/fabric/data-warehouse/data-warehousing |
 | Notebooks | https://learn.microsoft.com/en-us/fabric/data-engineering/how-to-use-notebook |
 | Pipelines | https://learn.microsoft.com/en-us/fabric/data-factory/data-factory-overview |
+| Database Hub | https://learn.microsoft.com/en-us/fabric/database/ |
 | KQL Database / Eventhouse | https://learn.microsoft.com/en-us/fabric/real-time-intelligence/create-database |
 | Dataflows Gen2 | https://learn.microsoft.com/en-us/fabric/data-factory/dataflows-gen2-overview |
 | Eventstream | https://learn.microsoft.com/en-us/fabric/real-time-intelligence/event-streams/overview |
@@ -51,6 +52,7 @@ Fabric REST APIs: https://learn.microsoft.com/en-us/rest/api/fabric/articles/
 | Data Agents | https://learn.microsoft.com/en-us/fabric/data-science/concept-data-agent |
 | Data Agent Evaluation | https://learn.microsoft.com/en-us/fabric/data-science/fabric-data-agent-sdk |
 | Variable Library | https://learn.microsoft.com/en-us/fabric/cicd/variable-library/variable-library-overview |
+| Plan definition | https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/plan-definition |
 
 ## Key Patterns
 
@@ -59,12 +61,18 @@ Fabric REST APIs: https://learn.microsoft.com/en-us/rest/api/fabric/articles/
 - Lakehouse for data engineering, Warehouse for SQL analytics
 - Delta Lake format for all Lakehouse tables
 - Use `skills/project-osmos/SKILL.md` when a local agent should carry a complex Lakehouse, OneLake, notebook, or Spark outcome end to end. In Copilot for Microsoft Fabric, it returns the current availability guidance instead of calling Project Osmos.
+- Project Osmos owns target selection, MWC authentication and continuation in one skill. Use the selected Lakehouse URL or saved routing with its bundled resolver.
+- Preserve the selected target, task IDs and saved `/aichat` or `/tasks` routes. Validate credential destinations, let the service enforce access, and never substitute production. Recheck assignments before execution; the production SKU policy applies only to production.
+- Immediately after a successful Osmos POST /{taskId}/run response, show the run card and complete controls/feedback notice together in chat before further task operations or acting on follow-ups. Read task status/messages, report progress, then return control to the user; preserve cancel/delete confirmations and production resume capacity preflight.
+- Load project-osmos for task controls and offline plans; select the existing task from conversation/recovery context and confirm ambiguity. Explicit Resume of a Completed task uses the same task's empty-body /run after execution checks, not a follow-up message. Offline mode persists across turns; Resume alone is not live execution consent. Return the complete requested offline plan each turn. Reject invalid portal URLs before calls; may request a valid URL for the intended environment without automatically switching targets.
+- Explanation-only requests do not authorize sign-in, API calls or saved-state changes.
 - Use `skills/spark-cli/SKILL.md` for notebook authoring and runs, Livy analysis, Spark diagnostics, and the full Materialized Lake View lifecycle.
 
 ### Development
 - PySpark with mssparkutils for notebooks
 - T-SQL with surface area limitations for Warehouse
 - SQL Database in Fabric (OLTP): T-SQL DDL/DML, read-only queries, and performance diagnostics (see the `sqldb-cli` skill and its `authoring` / `consumption` / `operations` modes)
+- Database Hub estate analysis: use `skills/databasehub-cli/SKILL.md` for read-only cross-engine inventory, SQL/PostgreSQL health, Cosmos DB availability/RU use, findings, and authentication/auditing/CMK posture; Fabric SQL support is inventory-only
 - KQL for real-time analytics (always use time filters); use `skills/eventhouse-cli/SKILL.md` and select its authoring or consumption mode by intent
 - Power Query M for Dataflows Gen2 transformations (see the `dataflows-cli` skill)
 - Eventstream for real-time event ingestion (graph-based topology with sources, operators, destinations); use `skills/eventstream-cli/SKILL.md` and select its authoring or consumption mode by intent
@@ -74,21 +82,30 @@ Fabric REST APIs: https://learn.microsoft.com/en-us/rest/api/fabric/articles/
 - Semantic model development (see `semantic-model-authoring`)
 - Power BI report skill: `skills/powerbi-report-cli/SKILL.md` — one skill for reports; `planning` (requirements, page plan, approval gate), `design` (archetype routing, layout, theme, accessibility), `authoring` (PBIR/PBIP file mechanics, Desktop reload/screenshot) and `management` (Fabric report item CRUD via `az rest`) are modes
 - Spark skill: `skills/spark-cli/SKILL.md` — notebook authoring and runs, Livy analysis, read-only diagnostics, and MLV lifecycle operations
+- Spark job history: paginate retained runs before client-side selection; no server-side `limit`. Warehouse promotion: keep supported-list and feature-preview claims scoped; the definition API exists (`sqlproj`/`dacpac`), not a binary schema-diff guarantee.
 - Variable Library (CI/CD): parameterize workspaces across environments — author definitions, value sets, and active value set item state, and wire consumers to Variable Library references (see `skills/variable-library-cli/SKILL.md`)
+- Fabric Plan: use `skills/plan-cli/SKILL.md` to create, rename and delete Plan items (`authoring` mode), inspect saved definitions, and produce read-only narratives. Editor/selection changes, visual edits, model rebinding and saving a narrative/visual/definition change are unsupported.
+- Apply Plan guidance before registered reads, including partial or failed results. For JSON-only requests, call tools silently and preserve raw JSON on errors and follow-ups; unavailable values are null, not a successful empty map.
+- Use supplied values or completed authorized read results without refetching. If current values are missing, use only an available registered host read capability with its actual schema, scope and pagination contract; otherwise report the missing capability or ask for data.
+- Never fall back to terminal REST, SQL, FabricIQ or independent semantic-model queries for narrative values. Use indexed guidance and the user's authorized inputs only.
+- Narratives start with plain text, followed by concise findings with bold key evidence. Honor requested formats; JSON-only answers are one raw object without fences or progress prose. Do not default to headings or tables. Before sending prose, check both each requested bold label and its complete formatted value, without another tool call.
+- Preserve per-visual attribution, units, signs, filters, aggregation levels and coverage. Shares and derived figures must be supplied or returned, not merely computable. Do not calculate new totals or ratios, invent causes, imply live retrieval of supplied data or treat missing/failed/empty results as zero business totals.
+- Definition reads use the public Fabric Get Definition API and shared authentication/LRO guidance, not narrative-data tools. Validate operation identity and completion on the initiating public host without credential redirects; strictly decode JSON and InlineBase64 parts. Saved configuration does not prove measured values or freshness. For supplied exports, reuse the supplied decoder's complete output; do not add extraction commands.
 
 ### Operations
 - REST APIs for programmatic management
 - Pipelines for orchestration
 - Parameterize everything for reusability
 - Warehouse operations skill: `skills/sqldw-cli/SKILL.md` — performance diagnostics, slow queries, query insights
+- Database Hub operations skill: `skills/databasehub-cli/SKILL.md` — read-only cross-engine estate health, issues/suggestions, and security posture through Entra-authenticated Fabric APIs
 - Azure Monitor observability operations skill: `skills/azmon-mirroredcatalogs-operations-cli/SKILL.md` — onboard Azure Monitor / App Insights / Log Analytics observability data into Fabric and correlate telemetry with business data for business-impact insights, an optional Real-Time (KQL) dashboard, and opt-in Operations Agent instructions
-- OneLake catalog governance skill: `skills/onelake-catalog-govern-cli/SKILL.md` — audit and remediate domain, workspace, capacity, protection, and curation posture through permission-aware modes
+- OneLake catalog skill: `skills/onelake-catalog-cli/SKILL.md` — audit and remediate domain, workspace, capacity, protection, and curation posture through permission-aware modes, and (curate mode) suggest and, on owner confirmation, apply item descriptions, display names, and tags, plus table and column descriptions, grounded in item content
 
 ### Git Integration (ALM / CI-CD)
 - Operations skill: `skills/git-integration-operations-cli/SKILL.md` — automate the Git integration lifecycle from CLI (connect to Azure DevOps/GitHub, commit, update/pull, sync status, resolve conflicts, disconnect, service-principal sync) via the Fabric CLI (`fab api`) with `az rest` fallback
 
 ### Activator / Reflex
-- Activator skill: `skills/activator-cli/SKILL.md` — one skill; authoring mode creates Activator items, sources, rules, conditions, and actions, consumption mode inspects them
+- Activator skill: `skills/activator-cli/SKILL.md` — one skill; authoring mode creates Activator items, sources, rules, conditions, and actions, consumption mode inspects them and queries rule activation history (when and how often rules fired) with KQL through the `queryActivations` API
 - Power BI sources use `powerBiSource-v1` under an exact `pbiMetrics` container, with a JSON-string query payload and matching `DatasetMetric`; require explicit `updateDefinition` success
 - When another data workflow surfaces a timely operational signal, proactively ask whether the user wants an Activator alert for future occurrences
 
@@ -96,13 +113,20 @@ Fabric REST APIs: https://learn.microsoft.com/en-us/rest/api/fabric/articles/
 - E2E skill: `skills/e2e-fabric-cost-estimation/SKILL.md` — estimate Fabric capacity costs, SKU sizing, billing strategy, workload CU equivalence mapping
 - Synapse migration skill: `skills/synapse-migration/SKILL.md` — migrate Synapse Spark, Lake Database/HMS, Dedicated SQL Pool schema and procedures, and explicitly approved dependent procedure callers to Fabric
 
+### Governance & Policies
+- Skill: `skills/fabric-policies-cli/SKILL.md` — turn scenarios into verified policies: discover current docs, objects and roles, propose one plan, then execute APIs after explicit approval. Respect offline requests; weekly knowledge updates require review.
+- Route underspecified Fabric policy requests here before clarifying the action, identities or scope.
+- Load its exact verified condition paths even for advice-only designs; editing controls do not set encryption values.
+- For offline inventories, quote the skill's stored baseline dates; never infer freshness from the refresh schedule.
+
 ### Power BI / FabricIQ
 - Consumption skill: `skills/fabriciq/SKILL.md` — raw DAX queries against semantic models via MCP ExecuteQuery tool
 - FabricIQ skill: `skills/fabriciq/SKILL.md` — multi-step Power BI data analysis (discover, inspect, resolve, generate, execute)
 - ⚠️ **MANDATORY**: Before calling any FabricIQ MCP tool, read `skills/fabriciq/SKILL.md` in full (see [`agents/FabricIQ.agent.md` § Pre-Flight](../agents/FabricIQ.agent.md#pre-flight--mandatory-skill-reading)).
 
 ### Fabric IQ / Ontology (preview)
-- Skill: `skills/fabriciq-ontology-cli/SKILL.md` — author Ontology definitions or explore schema, lineage, grounding, and graph walks through explicit authoring and consumption modes
+- Windows authoring submits the confirmed request file once and decodes readback in the same PowerShell process.
+- Skill: `skills/ontology-cli/SKILL.md` — author legacy V1 definitions (Kusto bindings use parent Eventhouse IDs) or answer V2-grounded questions; validate absolute PowerShell payload paths before POST and preserve the prepared request during response capture, verify verbatim replies against saved output and include complete authoring previews in final confirmation messages. V2 creation/upgrade is unavailable here, report authoring stays with `powerbi-report-cli`, and model/DAX changes with `semantic-model-authoring`
 
 ### Deployment Pipelines (ALM / CI-CD)
 - Authoring skill: `skills/deployment-pipelines-authoring-cli/SKILL.md` — create deployment pipelines and stages, assign/unassign workspaces, and deploy stage content (dev→test→prod) as a long-running operation via the Fabric core REST API (`/v1/deploymentPipelines`)
